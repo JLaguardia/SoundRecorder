@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">GenericCustomSoundboard</string>
+    <string name="app_default_label">Generic Soundboard</string>
+    <string name="new_label">New Sound</string>
+    <string name="record_label">Record</string>
+    <string name="stop_label">Stop</string>
+    <string name="about_label">About…</string>
+    <string name="pop_rename_file">Name of sound file:</string>
+</resources>
