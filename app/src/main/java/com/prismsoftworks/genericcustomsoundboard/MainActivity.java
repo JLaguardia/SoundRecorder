@@ -3,7 +3,6 @@ package com.prismsoftworks.genericcustomsoundboard;
 import android.Manifest;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.media.AudioFormat;
 import android.media.MediaRecorder;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -12,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
@@ -71,12 +71,6 @@ public class MainActivity extends AppCompatActivity {
             mSavedRootFile.mkdirs();
         }
 
-        if (mFileList == null) {
-            mFileList = new ArrayList<>();
-        } else {
-            mFileList.clear();
-        }
-
         String defAppTitle = getResources().getString(R.string.app_default_label);
         mTxtAppTitle = (AutoScrollTextView) findViewById(R.id.lblAppTitle);
         defAppTitle = mPrefs.getString(TITLE_KEY, defAppTitle);
@@ -92,23 +86,31 @@ public class MainActivity extends AppCompatActivity {
 
         mListView = (ListView) findViewById(R.id.listView);
         populateListView();
+
+        findViewById(R.id.btnDeleteAll).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteAllSounds();
+            }
+        });
     }
 
     public void dialogPopup(SoundObject sObj, View par, boolean lngClicked) {
         if (pop == null) {
             pop = new GenericDialog(rootView, sObj);
+        } else {
+            return;
         }
 
-        if (sObj.getSoundFile() == null) {
-
-            rootView.addView(pop.getMainContainer());
-            ((RelativeLayout.LayoutParams) pop.getMainContainer().getLayoutParams()).addRule(RelativeLayout.CENTER_HORIZONTAL);
-            ((RelativeLayout.LayoutParams) pop.getMainContainer().getLayoutParams()).addRule(RelativeLayout.CENTER_VERTICAL);
-        }
+        rootView.addView(pop.getMainContainer());
+        ((RelativeLayout.LayoutParams) pop.getMainContainer().getLayoutParams()).addRule(RelativeLayout.CENTER_HORIZONTAL);
+        ((RelativeLayout.LayoutParams) pop.getMainContainer().getLayoutParams()).addRule(RelativeLayout.CENTER_VERTICAL);
     }
 
-    protected void dialogDismiss() {
+    public void dialogDismiss() {
         rootView.removeView(pop.getMainContainer());
+        pop = null;
+        populateListView();
     }
 
     public void startRecording() {
@@ -141,8 +143,9 @@ public class MainActivity extends AppCompatActivity {
             mRecorder.prepare();
             mRecorder.start();
             isRecording = true;
+            pop.changeBtnIcon(android.R.drawable.ic_media_pause);
         } catch (Exception ex) {
-
+            ex.printStackTrace();
         }
     }
 
@@ -160,11 +163,31 @@ public class MainActivity extends AppCompatActivity {
             mRecorder.stop();
             mRecorder.release();
             mRecorder = null;
+            dialogDismiss();
         }
+    }
+
+    protected void deleteAllSounds(){
+        File[] files = mSavedRootFile.listFiles();
+        if(files != null){
+            for(File file : files){
+                Log.e(TAG, "deleting file: " + file.getName());
+                file.delete();
+            }
+        }
+
+        populateListView();
     }
 
     protected void populateListView() {
         File[] files = mSavedRootFile.listFiles();
+
+        if (mFileList == null) {
+            mFileList = new ArrayList<>();
+        } else {
+            mFileList.clear();
+        }
+
         if (files == null) {
             mFileNum = 0;
         } else {

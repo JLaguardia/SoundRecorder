@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.prismsoftworks.genericcustomsoundboard.MainActivity;
@@ -50,18 +51,23 @@ public class SoundAdapter extends BaseAdapter {
                 .inflate(R.layout.sound_item, parent, false);
         //viewholder stuff - we arent using recyclerviews unfortunately
         LinearLayout container = (LinearLayout) result.findViewById(R.id.soundContainer);
+        if (soundObject.getSoundFile() != null) {
+            ImageView img = (ImageView) result.findViewById(R.id.btnFakeRecord);
+            img.setImageResource(android.R.drawable.ic_media_play);
+        }
+
         container.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //get file instance, etc
-                ((MainActivity)mContext).dialogPopup(soundObject, result, false);
+                ((MainActivity) mContext).dialogPopup(soundObject, result, false);
             }
         });
 
         container.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                ((MainActivity)mContext).dialogPopup(soundObject, result, true);
+                ((MainActivity) mContext).dialogPopup(soundObject, result, true);
                 return false;
             }
         });

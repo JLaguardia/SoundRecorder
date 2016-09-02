@@ -17,8 +17,8 @@
 
         <ImageButton
             android:id="@+id/btnCloseDialog"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="55dp"
+            android:layout_height="40dp"
             android:src="@android:drawable/ic_delete" />
 
     </LinearLayout>
@@ -29,13 +29,27 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/lblDialog"
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="@string/record_label"
-            android:textSize="45sp" />
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/lblDialog"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:gravity="center"
+                android:text="@string/record_label"
+                android:textSize="45sp" />
+
+            <EditText
+                android:id="@+id/edtLabelDialog"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/record_label"
+                android:textSize="45sp"
+                android:visibility="gone" />
+        </LinearLayout>
 
         <ImageButton
             android:id="@+id/btnDialog"

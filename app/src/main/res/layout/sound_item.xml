@@ -10,14 +10,24 @@
         android:layout_height="wrap_content"
         android:clickable="true"
         android:focusable="true"
-        android:gravity="center"
         android:orientation="horizontal"
+        android:paddingEnd="10dp"
+        android:paddingStart="10dp"
         android:paddingTop="10dp">
+
+        <ImageView
+            android:id="@+id/btnFakeRecord"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center"
+            android:scaleType="fitXY"
+            android:src="@android:drawable/ic_menu_add" />
 
         <com.prismsoftworks.genericcustomsoundboard.object.AutoScrollTextView
             android:id="@+id/txtSoundTitle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:ellipsize="marquee"
             android:gravity="center"
             android:marqueeRepeatLimit="marquee_forever"
@@ -28,17 +38,5 @@
             android:textIsSelectable="true"
             android:textSize="45sp" />
 
-        <ImageView
-            android:id="@+id/btnFakeRecord"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:scaleType="fitXY"
-            android:src="@android:drawable/ic_menu_add" />
-
-        <!--<ImageButton-->
-        <!--android:src="@android:drawable/ic_btn_speak_now"-->
-        <!--android:id="@+id/btnFakeRecord"-->
-        <!--android:layout_width="40dp"-->
-        <!--android:layout_height="40dp" />-->
     </LinearLayout>
 </LinearLayout>
