@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.prismsoftworks.genericcustomsoundboard.object.AutoScrollTextView;
 import com.prismsoftworks.genericcustomsoundboard.object.GenericDialog;
@@ -81,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
         populateListView();
 
         //test: debug button, will add for specific files later.
+        findViewById(R.id.btnDeleteAll).setBackground(null);
         findViewById(R.id.btnDeleteAll).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -104,6 +106,12 @@ public class MainActivity extends AppCompatActivity {
     public void dialogDismiss() {
         rootView.removeView(pop.getMainContainer());
         pop = null;
+        populateListView();
+    }
+
+    public void deleteFile(File fileToDelete){
+        Toast.makeText(this, fileToDelete.getName() + " deleted", Toast.LENGTH_SHORT).show();
+        fileToDelete.delete();
         populateListView();
     }
 
@@ -162,7 +170,9 @@ public class MainActivity extends AppCompatActivity {
             mRecorder.stop();
             mRecorder.release();
             mRecorder = null;
-            dialogDismiss();
+            populateListView();
+            if(false)
+                dialogDismiss();
         }
     }
 

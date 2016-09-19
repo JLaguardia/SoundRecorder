@@ -22,7 +22,7 @@
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_alignParentEnd="true"
-            android:src="@android:drawable/ic_menu_revert" />
+            android:src="@android:drawable/ic_menu_more" />
     </RelativeLayout>
 
     <com.prismsoftworks.genericcustomsoundboard.object.AutoScrollTextView
@@ -42,7 +42,7 @@
         android:scrollHorizontally="true"
         android:singleLine="true"
         android:text="@string/app_default_label"
-        android:textSize="55sp" />
+        android:textSize="45sp" />
 
     <ListView
         android:id="@+id/listView"
