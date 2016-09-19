@@ -89,6 +89,7 @@ public class GenericDialog {
                 ((MainActivity)mContext).dialogDismiss();
             }
         });
+
         mLabel.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {

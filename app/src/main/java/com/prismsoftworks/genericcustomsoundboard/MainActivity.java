@@ -11,7 +11,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
@@ -43,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private ListView mListView;
 
     private final int[] mFormats = {MediaRecorder.OutputFormat.MPEG_4, MediaRecorder.OutputFormat.THREE_GPP};
-    private int currentFormat; //0 for mp4 stuff, 1 for 3gpp stuff
+    private int currentFormat; //0 for mp4 stuff, 1 for 3gpp stuff todo: implement this - currently ONLY mp4....
 
     private String userFileName = null;
     private File mSavedRootFile;
@@ -64,12 +63,6 @@ public class MainActivity extends AppCompatActivity {
     protected void init() {
         rootView = (RelativeLayout) findViewById(R.id.mainActRoot);
         mPrefs = getSharedPreferences(PREF_FILENAME, MODE_PRIVATE);
-        mSavedRootFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + internalDir);
-        Log.e(TAG, "savedRootFile: " + mSavedRootFile.getAbsolutePath());
-
-        if (!mSavedRootFile.exists()) {
-            mSavedRootFile.mkdirs();
-        }
 
         String defAppTitle = getResources().getString(R.string.app_default_label);
         mTxtAppTitle = (AutoScrollTextView) findViewById(R.id.lblAppTitle);
@@ -87,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
         mListView = (ListView) findViewById(R.id.listView);
         populateListView();
 
+        //test: debug button, will add for specific files later.
         findViewById(R.id.btnDeleteAll).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -132,11 +126,10 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mRecorder.setOutputFormat(mFormats[currentFormat]);
-        mRecorder.setOutputFile(getFilePath());
+        mRecorder.setOutputFile(getFilePath(true));
         mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB);
 
         try {
@@ -149,10 +142,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private String getFilePath() {
+    private String getFilePath(boolean newFile) {
+        if(newFile){
+            mFileNum++;
+        }
+
         //todo: inner currentFormat if should be predefined before getting to this point
         userFileName = userFileName == null ? mFileNum + (currentFormat < 1 ? ".mp4" : ".3gpp") :
                 userFileName;
+
+        Log.i(TAG, "output filename: " + mSavedRootFile.getAbsolutePath() + "/" + userFileName);
 
         return mSavedRootFile.getAbsolutePath() + "/" + userFileName;
     }
@@ -180,27 +179,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void populateListView() {
-        File[] files = mSavedRootFile.listFiles();
+        mSavedRootFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + internalDir);
+        Log.e(TAG, "savedRootFile: " + mSavedRootFile.getAbsolutePath());
+        userFileName = null;//todo: fix this eventually
 
-        if (mFileList == null) {
+        if (!mSavedRootFile.exists()) {
+            mSavedRootFile.mkdirs();
             mFileList = new ArrayList<>();
-        } else {
-            mFileList.clear();
-        }
-
-        if (files == null) {
             mFileNum = 0;
         } else {
-            mFileNum = files.length;
-        }
+            File[] files = mSavedRootFile.listFiles();
 
-        if (mFileNum > 0) {
-            for (File file : files) {
-                Log.i(TAG, "file: " + file.getName());
-                mFileList.add(new SoundObject(file.getName(), file));
+            if (mFileList == null) {
+                mFileList = new ArrayList<>();
+            } else {
+                mFileList.clear();
+            }
+
+            mFileNum = files.length;
+
+            Log.e(TAG, "number of files detected: " + mFileNum);
+
+            if (mFileNum > 0) {
+                for (File file : files) {
+                    Log.i(TAG, "detected file: " + file.getName());
+                    mFileList.add(new SoundObject(file.getName(), file));
+                }
             }
         }
 
+        //add "new sound" and null to end of list for the "add" button
         mFileList.add(new SoundObject(getString(R.string.new_label), null));
         SoundAdapter adapt = new SoundAdapter(mFileList, this);
         mListView.setAdapter(adapt);

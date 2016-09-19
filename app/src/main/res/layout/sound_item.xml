@@ -23,19 +23,17 @@
             android:scaleType="fitXY"
             android:src="@android:drawable/ic_menu_add" />
 
-        <com.prismsoftworks.genericcustomsoundboard.object.AutoScrollTextView
+        <TextView
             android:id="@+id/txtSoundTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:ellipsize="marquee"
+            android:focusable="false"
             android:gravity="center"
-            android:marqueeRepeatLimit="marquee_forever"
             android:paddingEnd="10dp"
             android:paddingStart="0dp"
             android:singleLine="true"
             android:text="@string/new_label"
-            android:textIsSelectable="true"
             android:textSize="45sp" />
 
     </LinearLayout>

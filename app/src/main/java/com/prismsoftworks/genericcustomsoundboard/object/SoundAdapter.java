@@ -1,8 +1,13 @@
 package com.prismsoftworks.genericcustomsoundboard.object;
 
 import android.content.Context;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -10,6 +15,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.prismsoftworks.genericcustomsoundboard.MainActivity;
 import com.prismsoftworks.genericcustomsoundboard.R;
@@ -21,6 +27,7 @@ import java.util.List;
  * Created by james/CarbonDawg on 8/18/16.
  */
 public class SoundAdapter extends BaseAdapter {
+    private static final String TAG = SoundAdapter.class.getSimpleName();
     private List<SoundObject> mItems;
     private Context mContext;
 
@@ -72,9 +79,41 @@ public class SoundAdapter extends BaseAdapter {
             }
         });
 
-        AutoScrollTextView txtLabel = (AutoScrollTextView) result.findViewById(R.id.txtSoundTitle);
+        final TextView txtLabel = (TextView) result.findViewById(R.id.txtSoundTitle);
         txtLabel.setText(soundObject.getTitle());
+        if (checkLabelWidth(soundObject.getTitle(), txtLabel)) {
+            txtLabel.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    int action = event.getAction();
+                    if (action == MotionEvent.ACTION_DOWN && !txtLabel.isSelected()) {
+                        txtLabel.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+                        txtLabel.setMarqueeRepeatLimit(-1); //Whatever.MARQUEE_FOREVER == -1 according to dox
+                        txtLabel.setTextIsSelectable(true);
+                        txtLabel.setSelected(true);
+                    } else if (action == MotionEvent.ACTION_UP) {
+                        txtLabel.setTextIsSelectable(false);
+                        txtLabel.setSelected(false);
+                    }
+
+                    return false;
+                }
+            });
+        }
 
         return result;
+    }
+
+    protected boolean checkLabelWidth(String label, TextView textView) {
+        Paint p = new Paint();
+        Rect bounds = new Rect();
+
+        p.setTypeface(Typeface.DEFAULT);
+        p.setTextSize(textView.getTextSize());
+
+        p.getTextBounds(label, 0, label.length(), bounds);
+
+//        Log.i(TAG, "returning: " + bounds.width() + " > " + textView.getWidth());
+        return bounds.width() > textView.getWidth();
     }
 }
