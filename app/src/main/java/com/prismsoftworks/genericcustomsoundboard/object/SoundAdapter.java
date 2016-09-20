@@ -6,14 +6,19 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -28,6 +33,7 @@ import java.util.List;
 
 /**
  * Created by james/CarbonDawg on 8/18/16.
+ *
  */
 public class SoundAdapter extends BaseAdapter {
     private static final String TAG = SoundAdapter.class.getSimpleName();
@@ -65,6 +71,7 @@ public class SoundAdapter extends BaseAdapter {
         //viewholder stuff - we arent using recyclerviews unfortunately
         LinearLayout container = (LinearLayout) result.findViewById(R.id.soundContainer);
         final ImageView img = (ImageView) result.findViewById(R.id.btnFakeRecord);
+        final TextView txtLabel = (TextView) result.findViewById(R.id.txtSoundTitle);
 
         if (soundObject.getSoundFile() != null) {
             img.setImageResource(android.R.drawable.ic_media_play);
@@ -83,7 +90,6 @@ public class SoundAdapter extends BaseAdapter {
                 } else {
                     toggleRecording(img);
                 }
-//                ((MainActivity) mContext).dialogPopup(soundObject, result, false);
             }
         });
 
@@ -94,13 +100,12 @@ public class SoundAdapter extends BaseAdapter {
                     stopPlaying();
                 }
 
-                //todo handle change name
-//                ((MainActivity) mContext).dialogPopup(soundObject, result, true);
-                return false;
+                Log.i(TAG, "calling nameChange");
+                nameChange(txtLabel, soundObject, false);
+                return true;
             }
         });
 
-        final TextView txtLabel = (TextView) result.findViewById(R.id.txtSoundTitle);
         txtLabel.setText(soundObject.getTitle());
         if (checkLabelWidth(soundObject.getTitle(), txtLabel)) {
             txtLabel.setOnTouchListener(new View.OnTouchListener() {
@@ -138,10 +143,66 @@ public class SoundAdapter extends BaseAdapter {
         return result;
     }
 
+    private void nameChange(final View view, final SoundObject sObj, boolean recursive){
+        if(!recursive) {
+            TextView label = (TextView) view;
+            final EditText edit = new EditText(mContext);
+            edit.setText(label.getText());
+            edit.setTextSize(35);
+            edit.setSelectAllOnFocus(true);
+            LinearLayout.LayoutParams llp = (LinearLayout.LayoutParams) label.getLayoutParams();
+            LinearLayout parent = (LinearLayout) label.getParent();
+            parent.addView(edit, llp);
+            label.setVisibility(View.GONE);
+
+            edit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                @Override
+                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                    Log.i(TAG, "input event: " + actionId);
+                    if (actionId == EditorInfo.IME_ACTION_SEND || actionId == EditorInfo.IME_NULL) {
+                        Log.i(TAG, "send detected");
+                        File f = new File(((MainActivity) mContext).getRootFile().getAbsolutePath() + "/" + v.getText().toString() + ".mp4");
+                        sObj.getSoundFile().renameTo(f);
+                        ((MainActivity) mContext).populateListView();
+                    }
+                    return false;
+                }
+            });
+
+
+            edit.setImeOptions(EditorInfo.IME_ACTION_SEND); //4 == actionSend
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Log.e(TAG, "calling focus on edit");
+//                    edit.requestFocus();
+                    edit.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                        @Override
+                        public void onFocusChange(View v, boolean hasFocus) {
+                            Log.i(TAG, "focus change: " + hasFocus);
+                            if(!hasFocus){
+//                                Log.e(TAG, "focus: " + ((MainActivity)mContext).getCurrentFocus().getClass().getSimpleName());
+                                nameChange(edit, null, true);
+                            }
+                        }
+                    });
+                }
+            }, 100);
+//            edit.requestFocus();
+//            InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+//            imm.showSoftInput(edit, 0);
+        } else {
+            Log.i(TAG, "removing edittext and replacing textview");
+            LinearLayout par = (LinearLayout) view.getParent();
+            par.removeView(view);
+            par.findViewById(R.id.txtSoundTitle).setVisibility(View.VISIBLE);
+        }
+    }
+
     private void toggleRecording(ImageView img) {
         if (activeImg == null) {
             activeImg = img;
-            activeImg.setImageResource(android.R.drawable.ic_media_pause);
+            activeImg.setImageResource(android.R.drawable.ic_media_pause); // maybe a different icon or an animation
             Log.e(TAG, "STARTED RECORDING");
             ((MainActivity) mContext).startRecording();
         } else {

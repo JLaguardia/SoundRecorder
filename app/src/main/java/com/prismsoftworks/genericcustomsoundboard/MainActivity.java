@@ -11,11 +11,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.prismsoftworks.genericcustomsoundboard.object.AutoScrollTextView;
 import com.prismsoftworks.genericcustomsoundboard.object.GenericDialog;
 import com.prismsoftworks.genericcustomsoundboard.object.SoundAdapter;
 import com.prismsoftworks.genericcustomsoundboard.object.SoundObject;
@@ -35,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     public static boolean isRecording = false;
 
     private MediaRecorder mRecorder = null;
-    private AutoScrollTextView mTxtAppTitle;
+    private TextView mTxtAppTitle;
     private int mFileNum = -1;
 
     private RelativeLayout rootView;
@@ -62,11 +63,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void init() {
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
         rootView = (RelativeLayout) findViewById(R.id.mainActRoot);
         mPrefs = getSharedPreferences(PREF_FILENAME, MODE_PRIVATE);
 
         String defAppTitle = getResources().getString(R.string.app_default_label);
-        mTxtAppTitle = (AutoScrollTextView) findViewById(R.id.lblAppTitle);
+        mTxtAppTitle = (TextView) findViewById(R.id.lblAppTitle);
         defAppTitle = mPrefs.getString(TITLE_KEY, defAppTitle);
         mTxtAppTitle.setText(defAppTitle);
         mTxtAppTitle.setOnLongClickListener(new View.OnLongClickListener() {
@@ -89,18 +91,6 @@ public class MainActivity extends AppCompatActivity {
                 deleteAllSounds();
             }
         });
-    }
-
-    public void dialogPopup(SoundObject sObj, View par, boolean lngClicked) {
-        if (pop == null) {
-            pop = new GenericDialog(rootView, sObj);
-        } else {
-            return;
-        }
-
-        rootView.addView(pop.getMainContainer());
-        ((RelativeLayout.LayoutParams) pop.getMainContainer().getLayoutParams()).addRule(RelativeLayout.CENTER_HORIZONTAL);
-        ((RelativeLayout.LayoutParams) pop.getMainContainer().getLayoutParams()).addRule(RelativeLayout.CENTER_VERTICAL);
     }
 
     public void dialogDismiss() {
@@ -156,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //todo: inner currentFormat if should be predefined before getting to this point
-        userFileName = userFileName == null ? mFileNum + (currentFormat < 1 ? ".mp4" : ".3gpp") :
+        userFileName = userFileName == null ? "new sound #" + mFileNum + (currentFormat < 1 ? ".mp4" : ".3gpp") :
                 userFileName;
 
         Log.i(TAG, "output filename: " + mSavedRootFile.getAbsolutePath() + "/" + userFileName);
@@ -171,8 +161,7 @@ public class MainActivity extends AppCompatActivity {
             mRecorder.release();
             mRecorder = null;
             populateListView();
-            if(false)
-                dialogDismiss();
+//            dialogDismiss();
         }
     }
 
@@ -188,7 +177,11 @@ public class MainActivity extends AppCompatActivity {
         populateListView();
     }
 
-    protected void populateListView() {
+    public File getRootFile(){
+        return mSavedRootFile;
+    }
+
+    public void populateListView() {
         mSavedRootFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + internalDir);
         Log.e(TAG, "savedRootFile: " + mSavedRootFile.getAbsolutePath());
         userFileName = null;//todo: fix this eventually

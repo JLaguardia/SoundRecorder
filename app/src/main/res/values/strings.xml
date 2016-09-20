@@ -6,4 +6,8 @@
     <string name="stop_label">Stop</string>
     <string name="about_label">About…</string>
     <string name="pop_rename_file">Name of sound file:</string>
+    <array name="context_options">
+        <item>Delete All</item>
+        <item>Help/About</item>
+    </array>
 </resources>
