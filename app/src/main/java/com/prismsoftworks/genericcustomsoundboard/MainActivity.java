@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private int mFileNum = -1;
 
     private RelativeLayout rootView;
-    private GenericDialog pop = null;
+//    private GenericDialog pop = null;
     private ListView mListView;
 
     private final int[] mFormats = {MediaRecorder.OutputFormat.MPEG_4, MediaRecorder.OutputFormat.THREE_GPP};
@@ -94,8 +94,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void dialogDismiss() {
-        rootView.removeView(pop.getMainContainer());
-        pop = null;
+//        rootView.removeView(pop.getMainContainer());
+//        pop = null;
         populateListView();
     }
 
@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
             mRecorder.prepare();
             mRecorder.start();
             isRecording = true;
-            pop.changeBtnIcon(android.R.drawable.ic_media_pause);
+//            pop.changeBtnIcon(android.R.drawable.ic_media_pause);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

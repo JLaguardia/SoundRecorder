@@ -7,8 +7,10 @@ import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -33,7 +35,6 @@ import java.util.List;
 
 /**
  * Created by james/CarbonDawg on 8/18/16.
- *
  */
 public class SoundAdapter extends BaseAdapter {
     private static final String TAG = SoundAdapter.class.getSimpleName();
@@ -75,6 +76,8 @@ public class SoundAdapter extends BaseAdapter {
 
         if (soundObject.getSoundFile() != null) {
             img.setImageResource(android.R.drawable.ic_media_play);
+        } else {
+            txtLabel.setGravity(Gravity.CENTER);//"new sound"
         }
 
         container.setOnClickListener(new View.OnClickListener() {
@@ -101,7 +104,7 @@ public class SoundAdapter extends BaseAdapter {
                 }
 
                 Log.i(TAG, "calling nameChange");
-                nameChange(txtLabel, soundObject, false);
+                nameChange(txtLabel, soundObject.getSoundFile(), false);
                 return true;
             }
         });
@@ -143,8 +146,10 @@ public class SoundAdapter extends BaseAdapter {
         return result;
     }
 
-    private void nameChange(final View view, final SoundObject sObj, boolean recursive){
-        if(!recursive) {
+    private void nameChange(final View view, final File file, boolean recursive) {
+        final InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context
+                .INPUT_METHOD_SERVICE);
+        if (!recursive) {
             TextView label = (TextView) view;
             final EditText edit = new EditText(mContext);
             edit.setText(label.getText());
@@ -162,40 +167,33 @@ public class SoundAdapter extends BaseAdapter {
                     if (actionId == EditorInfo.IME_ACTION_SEND || actionId == EditorInfo.IME_NULL) {
                         Log.i(TAG, "send detected");
                         File f = new File(((MainActivity) mContext).getRootFile().getAbsolutePath() + "/" + v.getText().toString() + ".mp4");
-                        sObj.getSoundFile().renameTo(f);
-                        ((MainActivity) mContext).populateListView();
+                        file.renameTo(f);
+                        nameChange(edit, null, true);
                     }
                     return false;
                 }
             });
 
-
             edit.setImeOptions(EditorInfo.IME_ACTION_SEND); //4 == actionSend
+
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    Log.e(TAG, "calling focus on edit");
 //                    edit.requestFocus();
-                    edit.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                        @Override
-                        public void onFocusChange(View v, boolean hasFocus) {
-                            Log.i(TAG, "focus change: " + hasFocus);
-                            if(!hasFocus){
-//                                Log.e(TAG, "focus: " + ((MainActivity)mContext).getCurrentFocus().getClass().getSimpleName());
-                                nameChange(edit, null, true);
-                            }
-                        }
-                    });
+//                    imm.showSoftInputFromInputMethod(edit.getWindowToken(), 0);
+                    long curT = SystemClock.uptimeMillis();
+                    edit.dispatchTouchEvent(MotionEvent.obtain(curT, curT + 30, MotionEvent.ACTION_DOWN, 0, 0, 0));
+                    edit.dispatchTouchEvent(MotionEvent.obtain(curT + 50, curT + 100, MotionEvent.ACTION_UP, 0, 0, 0));
                 }
             }, 100);
-//            edit.requestFocus();
-//            InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-//            imm.showSoftInput(edit, 0);
+
         } else {
             Log.i(TAG, "removing edittext and replacing textview");
             LinearLayout par = (LinearLayout) view.getParent();
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             par.removeView(view);
             par.findViewById(R.id.txtSoundTitle).setVisibility(View.VISIBLE);
+            ((MainActivity)mContext).populateListView();
         }
     }
 
@@ -208,7 +206,7 @@ public class SoundAdapter extends BaseAdapter {
         } else {
             activeImg = null;
             Log.e(TAG, "STOPPING RECORDING");
-            ((MainActivity)mContext).stopRecording();
+            ((MainActivity) mContext).stopRecording();
         }
     }
 

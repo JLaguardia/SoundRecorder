@@ -15,7 +15,7 @@ public class SoundObject {
         mSoundFile = file;
     }
 
-    public void setTitle(String title){
+    public void setTitle(String title){//probably dont need any mutator methods
         mTitle = title;
     }
 
