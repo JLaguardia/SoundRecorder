@@ -3,6 +3,7 @@ package com.prismsoftworks.genericcustomsoundboard;
 import android.Manifest;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -17,9 +18,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.prismsoftworks.genericcustomsoundboard.object.GenericDialog;
 import com.prismsoftworks.genericcustomsoundboard.object.SoundAdapter;
 import com.prismsoftworks.genericcustomsoundboard.object.SoundObject;
+import com.semantive.waveformandroid.waveform.WaveformFragment;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -40,15 +41,15 @@ public class MainActivity extends AppCompatActivity {
     private int mFileNum = -1;
 
     private RelativeLayout rootView;
-//    private GenericDialog pop = null;
     private ListView mListView;
 
-    private final int[] mFormats = {MediaRecorder.OutputFormat.MPEG_4, MediaRecorder.OutputFormat.THREE_GPP};
-    private int currentFormat; //0 for mp4 stuff, 1 for 3gpp stuff todo: implement this - currently ONLY mp4....
+//    private final int[] mFormats = {MediaRecorder.OutputFormat., MediaRecorder.OutputFormat.THREE_GPP};
+//    private int currentFormat; //0 for mp4 stuff, 1 for 3gpp stuff todo: implement this - currently ONLY mp4....
 
     private String userFileName = null;
     private File mSavedRootFile;
     private List<SoundObject> mFileList = null;
+    private SoundWaveFrag mSoundWaveFragment = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
 
         mRecorder = new MediaRecorder();
         mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mRecorder.setOutputFormat(mFormats[currentFormat]);
+        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         mRecorder.setOutputFile(getFilePath(true));
         mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB);
 
@@ -145,12 +146,7 @@ public class MainActivity extends AppCompatActivity {
             mFileNum++;
         }
 
-        //todo: inner currentFormat if should be predefined before getting to this point
-        userFileName = userFileName == null ? "new sound #" + mFileNum + (currentFormat < 1 ? ".mp4" : ".3gpp") :
-                userFileName;
-
-        Log.i(TAG, "output filename: " + mSavedRootFile.getAbsolutePath() + "/" + userFileName);
-
+        userFileName = userFileName == null ? "Sound # " + mFileNum + ".3gpp" : userFileName + ".3gpp";
         return mSavedRootFile.getAbsolutePath() + "/" + userFileName;
     }
 
@@ -215,5 +211,59 @@ public class MainActivity extends AppCompatActivity {
         mFileList.add(new SoundObject(getString(R.string.new_label), null));
         SoundAdapter adapt = new SoundAdapter(mFileList, this);
         mListView.setAdapter(adapt);
+    }
+
+    public SoundWaveFrag getWaveFragment(){
+        if(mSoundWaveFragment == null){
+            mSoundWaveFragment = new SoundWaveFrag();
+        }
+
+        return mSoundWaveFragment;
+    }
+
+    public void displayAndPlay(View holder, MediaPlayer mp){
+        if(mSoundWaveFragment.getAttachedView() != null) {
+            mSoundWaveFragment.getAttachedView().getLayoutParams().height -= 200;
+            getSupportFragmentManager().beginTransaction().remove(mSoundWaveFragment).commit();
+        }
+
+        holder.getLayoutParams().height += 200;
+        mSoundWaveFragment.setAttachedView(holder);
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.mainActRoot, mSoundWaveFragment).commit();
+//                .add(holder.findViewById(R.id.soundContainer).getId(), mSoundWaveFragment).commit();
+        mp.start();
+
+    }
+
+    public static class SoundWaveFrag extends WaveformFragment {
+        private File fileIn;
+        private View attachedView = null;
+
+        @Override
+        protected String getFileName() {
+            return fileIn.getAbsolutePath();
+        }
+
+        public void setFileIn(File file){
+            fileIn = file;
+        }
+
+        public void setAttachedView(View parView){
+            attachedView = parView;
+        }
+
+        public View getAttachedView(){
+            return attachedView;
+        }
+
+//        @Override
+//        protected List<Segment> getSegments() {
+//            return Arrays.asList(
+//                    new Segment(55.2, 55.8, Color.rgb(238, 23, 104)),
+//                    new Segment(56.2, 56.6, Color.rgb(238, 23, 104)),
+//                    new Segment(58.4, 59.9, Color.rgb(184, 92, 184))
+//            );
+//        }
     }
 }

@@ -26,7 +26,7 @@
                 android:layout_gravity="center"
                 android:scaleType="fitXY"
                 android:src="@android:drawable/ic_btn_speak_now" />
-<!--android:src="@android:drawable/ic_menu_add"-->
+
             <TextView
                 android:id="@+id/txtSoundTitle"
                 android:layout_width="match_parent"

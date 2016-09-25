@@ -16,7 +16,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseAdapter;
@@ -28,6 +27,7 @@ import android.widget.TextView;
 
 import com.prismsoftworks.genericcustomsoundboard.MainActivity;
 import com.prismsoftworks.genericcustomsoundboard.R;
+import com.semantive.waveformandroid.waveform.WaveformFragment;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -40,9 +40,10 @@ public class SoundAdapter extends BaseAdapter {
     private static final String TAG = SoundAdapter.class.getSimpleName();
     private List<SoundObject> mItems;
     private Context mContext;
-    private static File playingFile = null;
-    private static ImageView activeImg = null;
-    private static MediaPlayer mediaPlayer;
+    private File playingFile = null;
+    private MediaPlayer mediaPlayer;
+    private ImageView activeImg = null;
+//    private SoundWaveFrag waveFrag = null;
 
     public SoundAdapter(List<SoundObject> data, Context context) {
         mItems = new ArrayList<>(data);
@@ -89,7 +90,7 @@ public class SoundAdapter extends BaseAdapter {
                 }
 
                 if (soundObject.getSoundFile() != null) {
-                    startPlaying(soundObject.getSoundFile(), img);
+                    startPlaying(soundObject.getSoundFile(), img, result);
                 } else {
                     toggleRecording(img);
                 }
@@ -166,7 +167,7 @@ public class SoundAdapter extends BaseAdapter {
                     Log.i(TAG, "input event: " + actionId);
                     if (actionId == EditorInfo.IME_ACTION_SEND || actionId == EditorInfo.IME_NULL) {
                         Log.i(TAG, "send detected");
-                        File f = new File(((MainActivity) mContext).getRootFile().getAbsolutePath() + "/" + v.getText().toString() + ".mp4");
+                        File f = new File(((MainActivity) mContext).getRootFile().getAbsolutePath() + "/" + v.getText().toString() + ".3gpp");
                         file.renameTo(f);
                         nameChange(edit, null, true);
                     }
@@ -193,7 +194,7 @@ public class SoundAdapter extends BaseAdapter {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             par.removeView(view);
             par.findViewById(R.id.txtSoundTitle).setVisibility(View.VISIBLE);
-            ((MainActivity)mContext).populateListView();
+            ((MainActivity) mContext).populateListView();
         }
     }
 
@@ -210,20 +211,23 @@ public class SoundAdapter extends BaseAdapter {
         }
     }
 
-    private void startPlaying(File file, ImageView img) {
-        Log.i(TAG, "starting playback for: " + file.getName());
+    private void startPlaying(File file, ImageView img, View parent) {
+        Log.i(TAG, "setting up waveform and starting playback for: " + file.getName());
+
         if (playingFile != null) {
             stopPlaying();
         }
 
         playingFile = file;
+        ((MainActivity)mContext).getWaveFragment().setFileIn(file);
         activeImg = img;
         activeImg.setImageResource(android.R.drawable.ic_media_pause);
         if (mediaPlayer == null) {
             mediaPlayer = MediaPlayer.create(mContext, Uri.fromFile(playingFile));
         }
 
-        mediaPlayer.start();
+
+//        mediaPlayer.start();
         mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
@@ -235,6 +239,8 @@ public class SoundAdapter extends BaseAdapter {
                 mediaPlayer = null;
             }
         });
+
+        ((MainActivity)mContext).displayAndPlay(parent, mediaPlayer);
     }
 
     private void stopPlaying() {
@@ -247,7 +253,7 @@ public class SoundAdapter extends BaseAdapter {
         mediaPlayer = null;
     }
 
-    protected boolean checkLabelWidth(String label, TextView textView) {
+    private boolean checkLabelWidth(String label, TextView textView) {
         Paint p = new Paint();
         Rect bounds = new Rect();
 
@@ -259,4 +265,5 @@ public class SoundAdapter extends BaseAdapter {
 //        Log.i(TAG, "returning: " + bounds.width() + " > " + textView.getWidth());
         return bounds.width() > textView.getWidth();
     }
+
 }
