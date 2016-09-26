@@ -3,7 +3,6 @@ package com.prismsoftworks.genericcustomsoundboard;
 import android.Manifest;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -20,7 +19,6 @@ import android.widget.Toast;
 
 import com.prismsoftworks.genericcustomsoundboard.object.SoundAdapter;
 import com.prismsoftworks.genericcustomsoundboard.object.SoundObject;
-import com.semantive.waveformandroid.waveform.WaveformFragment;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -49,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
     private String userFileName = null;
     private File mSavedRootFile;
     private List<SoundObject> mFileList = null;
-    private SoundWaveFrag mSoundWaveFragment = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
             mFileNum++;
         }
 
-        userFileName = userFileName == null ? "Sound # " + mFileNum + ".3gpp" : userFileName + ".3gpp";
+        userFileName = userFileName == null ? "Sound # " + mFileNum + ".3gp" : userFileName + ".3gp";
         return mSavedRootFile.getAbsolutePath() + "/" + userFileName;
     }
 
@@ -157,7 +154,6 @@ public class MainActivity extends AppCompatActivity {
             mRecorder.release();
             mRecorder = null;
             populateListView();
-//            dialogDismiss();
         }
     }
 
@@ -211,59 +207,5 @@ public class MainActivity extends AppCompatActivity {
         mFileList.add(new SoundObject(getString(R.string.new_label), null));
         SoundAdapter adapt = new SoundAdapter(mFileList, this);
         mListView.setAdapter(adapt);
-    }
-
-    public SoundWaveFrag getWaveFragment(){
-        if(mSoundWaveFragment == null){
-            mSoundWaveFragment = new SoundWaveFrag();
-        }
-
-        return mSoundWaveFragment;
-    }
-
-    public void displayAndPlay(View holder, MediaPlayer mp){
-        if(mSoundWaveFragment.getAttachedView() != null) {
-            mSoundWaveFragment.getAttachedView().getLayoutParams().height -= 200;
-            getSupportFragmentManager().beginTransaction().remove(mSoundWaveFragment).commit();
-        }
-
-        holder.getLayoutParams().height += 200;
-        mSoundWaveFragment.setAttachedView(holder);
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.mainActRoot, mSoundWaveFragment).commit();
-//                .add(holder.findViewById(R.id.soundContainer).getId(), mSoundWaveFragment).commit();
-        mp.start();
-
-    }
-
-    public static class SoundWaveFrag extends WaveformFragment {
-        private File fileIn;
-        private View attachedView = null;
-
-        @Override
-        protected String getFileName() {
-            return fileIn.getAbsolutePath();
-        }
-
-        public void setFileIn(File file){
-            fileIn = file;
-        }
-
-        public void setAttachedView(View parView){
-            attachedView = parView;
-        }
-
-        public View getAttachedView(){
-            return attachedView;
-        }
-
-//        @Override
-//        protected List<Segment> getSegments() {
-//            return Arrays.asList(
-//                    new Segment(55.2, 55.8, Color.rgb(238, 23, 104)),
-//                    new Segment(56.2, 56.6, Color.rgb(238, 23, 104)),
-//                    new Segment(58.4, 59.9, Color.rgb(184, 92, 184))
-//            );
-//        }
     }
 }

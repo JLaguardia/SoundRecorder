@@ -9,6 +9,7 @@ import java.io.File;
 public class SoundObject {
     private String mTitle;
     private File mSoundFile;
+    private boolean editMode = false;
 
     public SoundObject(String title, File file){
         mTitle = title;
@@ -25,5 +26,13 @@ public class SoundObject {
 
     public File getSoundFile(){
         return mSoundFile;
+    }
+
+    public boolean isEditMode(){
+        return editMode;
+    }
+
+    public void toggleEditMode(){
+        editMode = !editMode;
     }
 }

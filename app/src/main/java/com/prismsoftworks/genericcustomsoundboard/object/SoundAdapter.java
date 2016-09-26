@@ -27,7 +27,6 @@ import android.widget.TextView;
 
 import com.prismsoftworks.genericcustomsoundboard.MainActivity;
 import com.prismsoftworks.genericcustomsoundboard.R;
-import com.semantive.waveformandroid.waveform.WaveformFragment;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -104,32 +103,31 @@ public class SoundAdapter extends BaseAdapter {
                     stopPlaying();
                 }
 
-                Log.i(TAG, "calling nameChange");
                 nameChange(txtLabel, soundObject.getSoundFile(), false);
                 return true;
             }
         });
 
         txtLabel.setText(soundObject.getTitle());
-        if (checkLabelWidth(soundObject.getTitle(), txtLabel)) {
-            txtLabel.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    int action = event.getAction();
-                    if (action == MotionEvent.ACTION_DOWN && !txtLabel.isSelected()) {
-                        txtLabel.setEllipsize(TextUtils.TruncateAt.MARQUEE);
-                        txtLabel.setMarqueeRepeatLimit(-1); //Whatever.MARQUEE_FOREVER == -1 according to dox
-                        txtLabel.setTextIsSelectable(true);
-                        txtLabel.setSelected(true);
-                    } else if (action == MotionEvent.ACTION_UP) {
-                        txtLabel.setTextIsSelectable(false);
-                        txtLabel.setSelected(false);
-                    }
-
-                    return false;
-                }
-            });
-        }
+//        if (checkLabelWidth(soundObject.getTitle(), txtLabel)) {
+//            txtLabel.setOnTouchListener(new View.OnTouchListener() {
+//                @Override
+//                public boolean onTouch(View v, MotionEvent event) {
+//                    int action = event.getAction();
+//                    if (action == MotionEvent.ACTION_DOWN && !txtLabel.isSelected()) {
+//                        txtLabel.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+//                        txtLabel.setMarqueeRepeatLimit(-1); //Whatever.MARQUEE_FOREVER == -1 according to dox
+//                        txtLabel.setTextIsSelectable(true);
+//                        txtLabel.setSelected(true);
+//                    } else if (action == MotionEvent.ACTION_UP) {
+//                        txtLabel.setTextIsSelectable(false);
+//                        txtLabel.setSelected(false);
+//                    }
+//
+//                    return false;
+//                }
+//            });
+//        }
 
         ImageButton btnDelete = (ImageButton) result.findViewById(R.id.btnDeleteFile);
         if (soundObject.getSoundFile() == null) {
@@ -139,12 +137,29 @@ public class SoundAdapter extends BaseAdapter {
             btnDelete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ((MainActivity) mContext).deleteFile(soundObject.getSoundFile());
+                    if (soundObject.isEditMode()) {
+                        ((MainActivity) mContext).deleteFile(soundObject.getSoundFile());
+                    } else {
+                        toggleEditMode(soundObject, result);
+                    }
                 }
             });
         }
 
         return result;
+    }
+
+    private void toggleEditMode(SoundObject sobj, View par) {
+        ImageButton btn = (ImageButton) par.findViewById(R.id.btnDeleteFile);
+        sobj.toggleEditMode();
+        if (sobj.isEditMode()) {
+            btn.setImageResource(android.R.drawable.ic_delete);
+            nameChange(par.findViewById(R.id.txtSoundTitle), sobj.getSoundFile(), false);
+        } else {
+            btn.setImageResource(android.R.drawable.ic_menu_edit);
+        }
+
+        btn.setBackground(null);
     }
 
     private void nameChange(final View view, final File file, boolean recursive) {
@@ -167,7 +182,7 @@ public class SoundAdapter extends BaseAdapter {
                     Log.i(TAG, "input event: " + actionId);
                     if (actionId == EditorInfo.IME_ACTION_SEND || actionId == EditorInfo.IME_NULL) {
                         Log.i(TAG, "send detected");
-                        File f = new File(((MainActivity) mContext).getRootFile().getAbsolutePath() + "/" + v.getText().toString() + ".3gpp");
+                        File f = new File(((MainActivity) mContext).getRootFile().getAbsolutePath() + "/" + v.getText().toString() + ".3gp");
                         file.renameTo(f);
                         nameChange(edit, null, true);
                     }
@@ -219,7 +234,6 @@ public class SoundAdapter extends BaseAdapter {
         }
 
         playingFile = file;
-        ((MainActivity)mContext).getWaveFragment().setFileIn(file);
         activeImg = img;
         activeImg.setImageResource(android.R.drawable.ic_media_pause);
         if (mediaPlayer == null) {
@@ -240,7 +254,7 @@ public class SoundAdapter extends BaseAdapter {
             }
         });
 
-        ((MainActivity)mContext).displayAndPlay(parent, mediaPlayer);
+        mediaPlayer.start();
     }
 
     private void stopPlaying() {
