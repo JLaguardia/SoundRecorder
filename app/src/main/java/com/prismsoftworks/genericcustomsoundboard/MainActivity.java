@@ -3,6 +3,7 @@ package com.prismsoftworks.genericcustomsoundboard;
 import android.Manifest;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.media.MediaRecorder;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -10,8 +11,10 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -144,6 +147,17 @@ public class MainActivity extends AppCompatActivity {
         }
 
         userFileName = userFileName == null ? "Sound # " + mFileNum + ".3gp" : userFileName + ".3gp";
+        int copyCount = 0;
+        String tempFileName = "";
+        for(File file : mSavedRootFile.listFiles()){
+            if(file.getName() == userFileName) {
+                copyCount++;
+                tempFileName = userFileName + copyCount;
+            }
+        }
+
+        if(!tempFileName.equals(""))
+            userFileName = tempFileName;
         return mSavedRootFile.getAbsolutePath() + "/" + userFileName;
     }
 

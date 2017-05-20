@@ -8,7 +8,6 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -34,6 +33,7 @@ import java.util.List;
 
 /**
  * Created by james/CarbonDawg on 8/18/16.
+ *
  */
 public class SoundAdapter extends BaseAdapter {
     private static final String TAG = SoundAdapter.class.getSimpleName();
