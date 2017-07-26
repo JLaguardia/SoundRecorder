@@ -43,10 +43,21 @@ public class SoundAdapter extends BaseAdapter {
     private MediaPlayer mediaPlayer;
     private ImageView activeImg = null;
 //    private SoundWaveFrag waveFrag = null;
+    private final EditText edit;
 
     public SoundAdapter(List<SoundObject> data, Context context) {
         mItems = new ArrayList<>(data);
         mContext = context;
+        edit = new EditText(context);
+        edit.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus) {
+                    ((ViewGroup) v.getParent()).getChildAt(((ViewGroup) v.getParent()).indexOfChild(v)-1).setVisibility(View.VISIBLE);
+                    ((ViewGroup) v.getParent()).removeView(v);
+                }
+            }
+        });
     }
 
     @Override
@@ -108,26 +119,14 @@ public class SoundAdapter extends BaseAdapter {
             }
         });
 
+        container.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+
+            }
+        });
+
         txtLabel.setText(soundObject.getTitle());
-//        if (checkLabelWidth(soundObject.getTitle(), txtLabel)) {
-//            txtLabel.setOnTouchListener(new View.OnTouchListener() {
-//                @Override
-//                public boolean onTouch(View v, MotionEvent event) {
-//                    int action = event.getAction();
-//                    if (action == MotionEvent.ACTION_DOWN && !txtLabel.isSelected()) {
-//                        txtLabel.setEllipsize(TextUtils.TruncateAt.MARQUEE);
-//                        txtLabel.setMarqueeRepeatLimit(-1); //Whatever.MARQUEE_FOREVER == -1 according to dox
-//                        txtLabel.setTextIsSelectable(true);
-//                        txtLabel.setSelected(true);
-//                    } else if (action == MotionEvent.ACTION_UP) {
-//                        txtLabel.setTextIsSelectable(false);
-//                        txtLabel.setSelected(false);
-//                    }
-//
-//                    return false;
-//                }
-//            });
-//        }
 
         ImageButton btnDelete = (ImageButton) result.findViewById(R.id.btnDeleteFile);
         if (soundObject.getSoundFile() == null) {
@@ -167,10 +166,12 @@ public class SoundAdapter extends BaseAdapter {
                 .INPUT_METHOD_SERVICE);
         if (!recursive) {
             TextView label = (TextView) view;
-            final EditText edit = new EditText(mContext);
+
             edit.setText(label.getText());
             edit.setTextSize(35);
             edit.setSelectAllOnFocus(true);
+            edit.setSingleLine(true);
+            edit.setImeOptions(EditorInfo.IME_ACTION_DONE);
             LinearLayout.LayoutParams llp = (LinearLayout.LayoutParams) label.getLayoutParams();
             LinearLayout parent = (LinearLayout) label.getParent();
             parent.addView(edit, llp);
@@ -179,10 +180,16 @@ public class SoundAdapter extends BaseAdapter {
             edit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
                 @Override
                 public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                    Log.i(TAG, "input event: " + actionId);
-                    if (actionId == EditorInfo.IME_ACTION_SEND || actionId == EditorInfo.IME_NULL) {
+                    Log.e(TAG, "input event: " + actionId);
+                    if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_NULL) {
                         Log.i(TAG, "send detected");
-                        File f = new File(((MainActivity) mContext).getRootFile().getAbsolutePath() + "/" + v.getText().toString() + ".3gp");
+                        String formattedName = v.getText().toString();
+                        if(formattedName.trim().equals(""))
+                            formattedName = ((MainActivity)mContext).getDefaultName();
+                         else
+                            formattedName += ".3gp";
+
+                        File f = new File(((MainActivity) mContext).getRootFile().getAbsolutePath() + "/" + formattedName);
                         file.renameTo(f);
                         nameChange(edit, null, true);
                     }
@@ -190,7 +197,6 @@ public class SoundAdapter extends BaseAdapter {
                 }
             });
 
-            edit.setImeOptions(EditorInfo.IME_ACTION_SEND); //4 == actionSend
 
             new Handler().postDelayed(new Runnable() {
                 @Override

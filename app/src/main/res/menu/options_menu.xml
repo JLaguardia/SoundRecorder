@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/miFiles"
+        android:title="Files"
+        android:titleCondensed="0" />
+
+    <item
+       android:id="@+id/miDelete"
+       android:title="Delete all sounds"
+       android:titleCondensed="1" />
+
+    <item
+        android:id="@+id/miExit"
+        android:title="Close App"
+        android:titleCondensed="2"
+        />
+</menu>

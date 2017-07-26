@@ -18,7 +18,7 @@
         android:layout_height="wrap_content">
 
         <ImageButton
-            android:id="@+id/btnDeleteAll"
+            android:id="@+id/btnDropDown"
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_alignParentEnd="true"

@@ -1,6 +1,7 @@
 package com.prismsoftworks.genericcustomsoundboard;
 
 import android.Manifest;
+import android.app.Application;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -8,10 +9,13 @@ import android.media.MediaRecorder;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.PopupMenuCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.PopupMenu;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -25,6 +29,8 @@ import com.prismsoftworks.genericcustomsoundboard.object.SoundObject;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -39,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
     private MediaRecorder mRecorder = null;
     private TextView mTxtAppTitle;
-    private int mFileNum = -1;
+    private static MainActivity instance = null;
 
     private RelativeLayout rootView;
     private ListView mListView;
@@ -55,12 +61,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        instance = this;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         init();
+    }
+
+    public static MainActivity getInstance(){
+        return instance;
     }
 
     protected void init() {
@@ -72,24 +83,24 @@ public class MainActivity extends AppCompatActivity {
         mTxtAppTitle = (TextView) findViewById(R.id.lblAppTitle);
         defAppTitle = mPrefs.getString(TITLE_KEY, defAppTitle);
         mTxtAppTitle.setText(defAppTitle);
-        mTxtAppTitle.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                //todo: handle changing of the name and the such
-                Log.i(TAG, "longclicked title");
-                return false;
-            }
-        });
+//        mTxtAppTitle.setOnLongClickListener(new View.OnLongClickListener() {
+//            @Override
+//            public boolean onLongClick(View v) {
+//                //todo: handle changing of the name and the such
+//                Log.i(TAG, "longclicked title");
+//                return false;
+//            }
+//        });
 
         mListView = (ListView) findViewById(R.id.listView);
         populateListView();
 
         //test: debug button, will add for specific files later.
-        findViewById(R.id.btnDeleteAll).setBackground(null);
-        findViewById(R.id.btnDeleteAll).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btnDropDown).setBackground(null);
+        findViewById(R.id.btnDropDown).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deleteAllSounds();
+                openDropDown(v);
             }
         });
     }
@@ -141,16 +152,28 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public String getDefaultName(){
+        final Calendar c = Calendar.getInstance();
+        return (new StringBuilder()
+                .append(c.get(Calendar.YEAR)).append("-")
+                .append(c.get(Calendar.MONTH)+ 1).append("-")
+                .append(c.get(Calendar.DAY_OF_MONTH)).append("_")
+                .append(c.get(Calendar.HOUR)).append(".")
+                .append(c.get(Calendar.MINUTE)).append(".")
+                .append(c.get(Calendar.SECOND)).append(".3gp"))
+                .toString();
+    }
+
     private String getFilePath(boolean newFile) {
         if(newFile){
-            mFileNum++;
+            userFileName = null;
         }
 
-        userFileName = userFileName == null ? "Sound # " + mFileNum + ".3gp" : userFileName + ".3gp";
+        userFileName = userFileName == null ? getDefaultName() : userFileName + ".3gp";
         int copyCount = 0;
         String tempFileName = "";
         for(File file : mSavedRootFile.listFiles()){
-            if(file.getName() == userFileName) {
+            if(file.getName().equals(userFileName)) {
                 copyCount++;
                 tempFileName = userFileName + copyCount;
             }
@@ -171,16 +194,45 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    protected void deleteAllSounds(){
-        File[] files = mSavedRootFile.listFiles();
-        if(files != null){
-            for(File file : files){
-                Log.e(TAG, "deleting file: " + file.getName());
-                file.delete();
-            }
-        }
+    protected void openDropDown(View sender){
+        final PopupMenu poppy = new PopupMenu(MainActivity.this, sender);
+        poppy.getMenuInflater().inflate(R.menu.options_menu, poppy.getMenu());
 
-        populateListView();
+        poppy.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch((String)item.getTitleCondensed()) {
+                    case "0":
+                        //open file file list etc.
+                        break;
+                    case "1":
+                        //delete all
+                        File[] files = mSavedRootFile.listFiles();
+                        if(files != null){
+                            for(File file : files){
+                                Log.e(TAG, "deleting file: " + file.getName());
+                                file.delete();
+                            }
+                        }
+
+                        Toast.makeText(getInstance(), "All custom sounds deleted.", Toast.LENGTH_SHORT).show();
+                        populateListView();
+                        break;
+                    case "2":
+                        MainActivity.getInstance().finish();
+                        break;
+                    default:
+                        return false;
+                }
+
+                poppy.dismiss();
+                return true;
+            }
+        });
+
+        poppy.show();
+//        Toast.makeText(this, "App made by James L for my friend, Patricia \"Earring\"", Toast.LENGTH_LONG).show();
+
     }
 
     public File getRootFile(){
@@ -189,13 +241,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void populateListView() {
         mSavedRootFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + internalDir);
-        Log.e(TAG, "savedRootFile: " + mSavedRootFile.getAbsolutePath());
-        userFileName = null;//todo: fix this eventually
+        Log.i(TAG, "savedRootFile: " + mSavedRootFile.getAbsolutePath());
+        userFileName = null;
 
         if (!mSavedRootFile.exists()) {
             mSavedRootFile.mkdirs();
             mFileList = new ArrayList<>();
-            mFileNum = 0;
         } else {
             File[] files = mSavedRootFile.listFiles();
 
@@ -205,11 +256,7 @@ public class MainActivity extends AppCompatActivity {
                 mFileList.clear();
             }
 
-            mFileNum = files.length;
-
-            Log.e(TAG, "number of files detected: " + mFileNum);
-
-            if (mFileNum > 0) {
+            if (files.length > 0) {
                 for (File file : files) {
                     Log.i(TAG, "detected file: " + file.getName());
                     mFileList.add(new SoundObject(file.getName(), file));
