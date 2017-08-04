@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/GenericCustomSoundboard.iml" filepath="$PROJECT_DIR$/GenericCustomSoundboard.iml" />
+      <module fileurl="file://C:\Users\bohregard\StudioProjects\SoundRecorder\GenericCustomSoundboard.iml" filepath="C:\Users\bohregard\StudioProjects\SoundRecorder\GenericCustomSoundboard.iml" />
+      <module fileurl="file://$PROJECT_DIR$/SoundRecorder.iml" filepath="$PROJECT_DIR$/SoundRecorder.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
