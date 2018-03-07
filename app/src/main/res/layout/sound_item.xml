@@ -38,7 +38,8 @@
                 android:paddingStart="0dp"
                 android:singleLine="true"
                 android:text="@string/new_label"
-                android:textSize="20sp" />
+                style="@android:style/TextAppearance.DeviceDefault.Medium"
+                />
         </LinearLayout>
 
         <ImageButton

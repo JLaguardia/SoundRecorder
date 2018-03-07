@@ -78,9 +78,10 @@ public class SoundAdapter extends BaseAdapter {
     @Override
     public View getView(int index, View convertView, ViewGroup parent) {
         final SoundObject soundObject = mItems.get(index);
-        final View result = ((LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE))
-                .inflate(R.layout.sound_item, parent, false);
+//        final View result = ((LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE))
+//                .inflate(R.layout.sound_item, parent, false);
         //viewholder stuff - we arent using recyclerviews unfortunately
+        final View result = convertView;
         LinearLayout container = (LinearLayout) result.findViewById(R.id.soundContainer);
         final ImageView img = (ImageView) result.findViewById(R.id.btnFakeRecord);
         final TextView txtLabel = (TextView) result.findViewById(R.id.txtSoundTitle);
@@ -168,7 +169,7 @@ public class SoundAdapter extends BaseAdapter {
             TextView label = (TextView) view;
 
             edit.setText(label.getText());
-            edit.setTextSize(35);
+//            edit.setTextSize(35);
             edit.setSelectAllOnFocus(true);
             edit.setSingleLine(true);
             edit.setImeOptions(EditorInfo.IME_ACTION_DONE);
