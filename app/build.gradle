@@ -1,15 +1,44 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion '25.0.0'
+    def versionPropsFile = file('version.properties')
+    def versionBuild
+
+
+    if (versionPropsFile.canRead()) {
+        def Properties versionProps = new Properties()
+        versionProps.load(new FileInputStream(versionPropsFile))
+        versionBuild = versionProps['VERSION_BUILD'].toInteger()
+    } else {
+        throw new GradleException("Could not read version.properties!")
+    }
+
+    ext.autoIncrementBuildNumber = {
+        if (versionPropsFile.canRead()) {
+            def Properties versionProps = new Properties()
+            versionProps.load(new FileInputStream(versionPropsFile))
+            versionBuild = versionProps['VERSION_BUILD'].toInteger() + 1
+            versionProps['VERSION_BUILD'] = versionBuild.toString()
+            versionProps.store(versionPropsFile.newWriter(), null)
+        } else {
+            throw new GradleException("Could not read version.properties!")
+        }
+    }
+
+
+    def versionMajor = 0
+    def versionMinor = 1
+    def versionPatch = 0
+
+    compileSdkVersion 26
+    buildToolsVersion '26.0.2'
 
     defaultConfig {
         applicationId "com.prismsoftworks.genericcustomsoundboard"
         minSdkVersion 18
-        targetSdkVersion 24
-        versionCode 1
-        versionName "1.0"
+        targetSdkVersion 26
+        versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100 + versionBuild
+        versionName "${versionMajor}.${versionMinor}.${versionPatch} v${versionBuild}"
     }
     buildTypes {
         release {
@@ -17,12 +46,18 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    gradle.taskGraph.whenReady { taskGraph ->
+        if (taskGraph.hasTask(assembleDebug) || taskGraph.hasTask(assembleRelease)) {
+            autoIncrementBuildNumber()
+        }
+    }
 }
 
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:24.2.1'
-
+    testImplementation 'junit:junit:4.12'
+    implementation 'com.android.support:appcompat-v7:26.0.0'
+    implementation 'com.android.support:recyclerview-v7:26.0.0'
 }
