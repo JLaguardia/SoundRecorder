@@ -234,7 +234,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         poppy.show();
-//        Toast.makeText(this, "App made by James L for my friend, Patricia \"Earring\"", Toast.LENGTH_LONG).show();
 
     }
 
